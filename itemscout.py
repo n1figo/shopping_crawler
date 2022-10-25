@@ -15,7 +15,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 # from pyvirtualdisplay import Display
 from datetime import datetime
-from GetFirmCode import GetCode
+# from GetFirmCode import GetCode
 import requests, os, itertools, json, time, sys, re, sqlite3
 import pandas as pd
 import numpy as np
@@ -208,9 +208,7 @@ class GetFinanceInfo_IS:
 
       # 1.1. 종목코드 직접입력
       # url 정의
-      quote = 'ceka'
-      # url = 'https://www.investing.com/equities/apple-computer-inc'
-      url = 'https://www.investing.com/search/?q=' + quote
+      url = 'https://itemscout.io/category?c=6,142,346'
       self.driver.get(url)
 
       # 1.2. 기업명 클릭
