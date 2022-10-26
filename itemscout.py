@@ -32,23 +32,68 @@ import matplotlib.pyplot as plt
 
 
 # 1. 손익계산서 크롤링
-class GetFinanceInfo_IS:
+class GetItemScoutWebpage:
     def __init__(self):
         self.BASE_DIR = os.path.dirname(os.path.abspath('__file__'))
-        print('-'*50)
-        print('-'*50)
-        print('-'*50)
+        print('='*50)
         print('--- 크롤링을 시작합니다. ---')
-        print('-'*50)
-        print('-'*50)
-        print('-'*50)
         print('현재 경로는',self.BASE_DIR,'입니다.')
-
-        # 1. investing.com 에 종목코드 입력 (selenium)
-        # 2. 출력된 화면에서 finance > balance-sheet 찾아가거나 (selenium)
-        # 3. 종목명으로 url 입력하고, url 에서 분기 재무제표 db저장 (requests)
-        # 4. 연간 재무제표 클릭해서 역시 db 저장 (selenium)
+        print('='*50)
         
+
+    def run(self):
+      self.getItemScout()
+
+
+    def getItemScout(self):
+      chrome_options = webdriver.ChromeOptions()
+
+      #지정한 user-agent로 설정합니다.
+      user_agent = "Mozilla/5.0 (Linux; Android 9; SM-G975F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.83 Mobile Safari/537.36"
+      chrome_options.add_argument('user-agent=' + user_agent)
+
+      # options.add_argument('headless') #headless모드 브라우저가 뜨지 않고 실행됩니다.
+      chrome_options.add_argument('--window-size= x, y') #실행되는 브라우저 크기를 지정할 수 있습니다.
+      chrome_options.add_argument('--start-maximized') #브라우저가 최대화된 상태로 실행됩니다.
+      chrome_options.add_argument('--start-fullscreen') #브라우저가 풀스크린 모드(F11)로 실행됩니다.
+      chrome_options.add_argument('--blink-settings=imagesEnabled=false') #브라우저에서 이미지 로딩을 하지 않습니다.
+      chrome_options.add_argument('--mute-audio') #브라우저에 음소거 옵션을 적용합니다.
+      chrome_options.add_argument('incognito') #시크릿 모드의 브라우저가 실행됩니다.
+
+
+      # 기본 설정
+      # chrome_options = webdriver.ChromeOptions()
+      # chrome_options.add_argument('--headless')
+      # chrome_options.add_argument('--window-size=1920x1080')
+      # chrome_options.add_argument('--no-sandbox')
+      # chrome_options.add_argument('--disable-gpu')
+      # chrome_options.add_argument('--disable-dev-shm-usage')
+      # chrome_options.add_argument('--user-agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.125 Safari/537.36"')
+
+      # 윈도우버전 --> 크롬드라이버 교체할 것
+      chrome_path = os.path.join(self.BASE_DIR, 'chromedriver')
+      # 맥버전
+      # 리눅스버전
+      chrome_path = self.BASE_DIR
+      # chrome_path = os.path.join(self.BASE_DIR, 'chromedriver2')
+      # print('크롬 설치경로입니다:',chrome_path)
+      # self.driver = webdriver.Chrome(executable_path=chrome_path, options=chrome_options)
+
+      # colab버전
+      self.driver = webdriver.Chrome('chromedriver',chrome_options=chrome_options)
+      # print('---크롤링 준비가 완료되었습니다.---')
+
+      # 1.1. 종목코드 직접입력
+      # url 정의
+      url = 'https://itemscout.io/category?c=6,142,346'
+      self.driver.get(url)
+      
+
+      # PC웹버전 클릭
+      pc_xpath = '/html/body/div[1]/div/div/div/div[1]/div/a'
+
+
+      
 
     def getIS(self):
       # 분기 손익계산서 파싱
@@ -582,68 +627,6 @@ class GetFinanceInfo_CF:
     return df, driver
 
 
-# 재무비율 파싱
-class GetFinanceInfo_Ratio:
-  def __init__(self):
-    pass
-
-
-
-
-class GetFinanceInfo_All(GetFinanceInfo_IS, GetFinanceInfo_BS, GetFinanceInfo_CF, GetFinanceInfo_Ratio):
-  def __init__(self):
-    self.BASE_DIR = os.path.dirname(os.path.abspath('__file__'))
-    self.IS = GetFinanceInfo_IS()
-
-  def run(self):
-    # 종목코드 최신화
-    print('--종목코드 최신화를 시작합니다.--')
-    gc = GetCode()
-    df_codes = gc.run()
-    print('---최신화 종료---')
-
-    df_IS, driver = self.IS.getIS()
-
-    # 재무상태표 최근분기 파싱
-    BS = GetFinanceInfo_BS(driver, self.BASE_DIR)
-    df_BS, driver = BS.getBS()
-    
-    # 현금흐름표 TTM 파싱    
-    CF = GetFinanceInfo_CF(driver, self.BASE_DIR)
-    df_CF, driver = CF.getCF()
-    print('df_CF inclass:', type(df_CF)) # tuple
-
-    # 재무정보 합산
-    df_all = self.Get_AllInFo_Merge(df_IS, df_BS, df_CF)
-    
-    # 중복 컬럼 제거
-    df_all_duplicates = self.modify_column_name(df_all)
-
-    # 인덱스 이름 설정
-    df_all_duplicates.index.name = 'period'
-
-    # DB저장
-    self.sqlite_append(df_all_duplicates)
-
-    # 종목코드 최신화
-    # 종목코드 db에서 가져오기
-    stock_code = self.GetStockCode()
-
-    # 종목코드별로 재무데이터 취합
-
-
-    return df_all_duplicates, driver
-
-
-  # 재무정보 합산
-  def Get_AllInFo_Merge(self, df_IS, df_BS, df_CF):
-    tmp = pd.merge(df_IS, df_BS, left_index=True, right_index=True, how='outer')
-    df_CF = pd.DataFrame(df_CF)
-    df_all = pd.merge(tmp, df_CF, left_index=True, right_index=True, how='outer')
-    filename = os.path.join(self.BASE_DIR, 'df_all.csv')
-    df_all.to_csv(filename)
-    
-    return df_all
 
   def modify_column_name(self, df):
     df2 = df.copy()
@@ -671,8 +654,6 @@ class GetFinanceInfo_All(GetFinanceInfo_IS, GetFinanceInfo_BS, GetFinanceInfo_CF
 
 
 if __name__ == "__main__" :
-  get = GetFinanceInfo_All()
-  df, driver = get.run()
-  # df_IS, driver = get.getIS()
-  # df_BS, driver = get.getBS(driver)
-  # df_CF, driver = get.getCF(driver)
+  get = GetItemScoutWebpage()
+  get.run()
+  
