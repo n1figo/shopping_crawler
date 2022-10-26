@@ -87,13 +87,20 @@ class GetItemScoutWebpage:
       # url 정의
       url = 'https://itemscout.io/category?c=6,142,346'
       self.driver.get(url)
-      
+     
 
       # PC웹버전 클릭
+      time.sleep(10)
       pc_xpath = '/html/body/div[1]/div/div/div/div[1]/div/a'
+      pc_web = self.driver.find_element_by_xpath(pc_xpath)
+      pc_web.click()
 
 
-      
+      # 3번째 카테고리 풀리스트
+      """h2start!!!"""
+
+
+
 
     def getIS(self):
       # 분기 손익계산서 파싱
