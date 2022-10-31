@@ -90,14 +90,38 @@ class GetItemScoutWebpage:
      
 
       # PC웹버전 클릭
-      time.sleep(10)
+      time.sleep(5)
       pc_xpath = '/html/body/div[1]/div/div/div/div[1]/div/a'
       pc_web = self.driver.find_element_by_xpath(pc_xpath)
       pc_web.click()
 
 
-      # 3번째 카테고리 풀리스트
-      """h2start!!!"""
+      # 3번째 카테고리 풀리스트 3차분류 클릭
+      # 3번째 카테고리 첫번째 입력
+      third_cate_xpath = '/html/body/div[1]/div/div/div[1]/main/div/div/div/div[1]/div[1]/div[2]/div/div/div[3]/div[1]'
+      third_cate = self.driver.find_element_by_xpath(third_cate_xpath)
+      third_cate.click()
+
+      # 3번째 카테고리 리스트 출력 -> 몇개나 있나?
+      third_full_list_xpath = '/html/body/div[1]/div/div/div[2]'
+
+      third_elem_list = self.driver.find_element_by_xpath(third_full_list_xpath)
+      print(third_elem_list)
+
+
+      # tbl = driver.find_element_by_xpath(테이블주소).get_attribute('outerHTML')
+
+      """
+      # 테이블 긁어오기 
+      soup = BeautifulSoup(tbl, 'html.parser')
+      # print(soup)
+
+      # 테이블 내용 파싱
+      l = []
+      table_all = soup.find('table',{'class':'genTbl reportTbl'})
+
+      '/html/body/div[1]/div/div/div[2]/div/div/div[2]/div'
+      """
 
 
 
