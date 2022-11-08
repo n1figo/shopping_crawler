@@ -106,6 +106,7 @@ class GetItemScoutWebpage:
       third_full_list_xpath = '/html/body/div[1]/div/div/div[2]'
 
       third_elem_list = self.driver.find_element_by_xpath(third_full_list_xpath)
+      print("="*50)
       print(third_elem_list)
 
 
